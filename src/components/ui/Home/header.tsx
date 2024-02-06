@@ -9,6 +9,7 @@ import { Button } from "../button";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { IoIosLogOut } from "react-icons/io";
 import { useGlobalContext } from "@/context/GlobalContext";
+import Link from "next/link";
 
 export const Header = () => {
   const { data: sessionData, status, update } = useSession();
@@ -22,7 +23,9 @@ export const Header = () => {
         <IoReorderFourOutline className="text-2xl text-gray-600" />
       </div>
       {/* title */}
-      <h1 className="text-xl font-thin">Next Blog</h1>
+      <Link href="/">
+        <h1 className="text-xl font-thin">Next Blog</h1>
+      </Link>
       <div className="flex items-center space-x-4">
         {status === "authenticated" ? (
           <>

@@ -5,6 +5,9 @@ import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "@/trpc/react";
 import SessionWrapper from "@/components/SessionWrapper";
 import { GlobalContextProvider } from "@/context/GlobalContext";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as ReactHotToaster } from "react-hot-toast";
+import { Header } from "@/components/ui/Home";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,7 +30,14 @@ export default function RootLayout({
       <GlobalContextProvider>
         <html lang="en">
           <body className={`font-sans ${inter.variable} overflow-hidden`}>
-            <TRPCReactProvider>{children}</TRPCReactProvider>
+            <ReactHotToaster position="top-center" />
+            <TRPCReactProvider>
+            <div className="flex w-full flex-col">
+      <Header />
+              {children}
+            </div>
+            </TRPCReactProvider>
+            <Toaster />
           </body>
         </html>
       </GlobalContextProvider>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Suggestions } from "./suggestions";
+import { Suggestions } from "./Suggestions";
 import { Card } from "../card";
 import ReadingList from "./ReadingList";
 export const Sidebar = () => {
