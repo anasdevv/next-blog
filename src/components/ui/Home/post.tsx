@@ -3,6 +3,8 @@ import type { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
 import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import Link from "next/link";
+import Bookmark from "../Post/Bookmark";
+
 export interface PostProps {
   post: Prisma.PostGetPayload<{
     include: {
@@ -12,20 +14,27 @@ export interface PostProps {
           image: true;
         };
       };
+      bookmarks: {
+        select: {
+          id: true;
+        };
+      };
     };
   }>;
 }
 
 export const Post = ({
   post: {
+    id,
     description,
-    text,
     title,
     createdAt,
     slug,
     author: { name, image },
+    bookmarks,
   },
 }: PostProps) => {
+  console.log("bk  ", bookmarks);
   return (
     <div className="group mt-4 flex flex-col space-y-4 border-b border-gray-300 py-5 last:border-none">
       <div className="flex w-full items-center space-x-2">
@@ -61,8 +70,11 @@ export const Post = ({
           </div>
         </div>
       </Link>
+      <div className="flex justify-between">
+        <Tags />
 
-      <Tags />
+        <Bookmark postId={id} isPostBookmarked={bookmarks?.length > 0} />
+      </div>
     </div>
   );
 };

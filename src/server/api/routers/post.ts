@@ -19,13 +19,18 @@ export const postRouter = createTRPCRouter({
       };
     }),
 
-  findAll: publicProcedure.query(async ({ ctx: { db } }) =>
+  findAll: publicProcedure.query(async ({ ctx: { db, session } }) =>
     db.post.findMany({
       take: 10,
       orderBy: {
         createdAt: "desc",
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        createdAt: true,
+        slug: true,
         author: {
           select: {
             name: true,
@@ -33,6 +38,13 @@ export const postRouter = createTRPCRouter({
             image: true,
           },
         },
+        bookmarks: session?.user.id
+          ? {
+              select: {
+                id: true,
+              },
+            }
+          : false,
       },
     }),
   ),
@@ -43,8 +55,37 @@ export const postRouter = createTRPCRouter({
         where: {
           slug,
         },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          text: true,
+          createdAt: true,
+        },
       }),
     ),
+  isPostLiked: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx: { db, session }, input: { postId } }) => {
+      const like = await db.like.findFirst({
+        where: {
+          userId: session.user.id,
+          postId,
+        },
+      });
+      return like?.id ? true : false;
+    }),
+  isBookmarked: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .query(async ({ ctx: { db, session }, input: { postId } }) => {
+      const like = await db.bookmark.findFirst({
+        where: {
+          userId: session.user.id,
+          postId,
+        },
+      });
+      return like?.id ? true : false;
+    }),
   like: protectedProcedure
     .input(z.object({ postId: z.string() }))
     .mutation(async ({ ctx: { db, session }, input: { postId } }) =>
@@ -55,6 +96,47 @@ export const postRouter = createTRPCRouter({
         },
       }),
     ),
+  unlike: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .mutation(async ({ ctx: { db, session }, input: { postId } }) =>
+      db.like.delete({
+        where: {
+          userId_postId: {
+            postId,
+            userId: session.user.id,
+          },
+        },
+      }),
+    ),
+  addToBookmarks: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .mutation(async ({ ctx: { db, session }, input: { postId } }) =>
+      db.bookmark.create({
+        data: {
+          postId,
+          userId: session.user.id,
+        },
+      }),
+    ),
+  removeFromBookmarks: protectedProcedure
+    .input(z.object({ postId: z.string() }))
+    .mutation(async ({ ctx: { db, session }, input: { postId } }) => {
+      const test = db.bookmark.findMany({
+        where: {
+          userId: session.user.id,
+        },
+      });
+      console.log("test ", test);
+      return db.bookmark.delete({
+        where: {
+          userId_postId: {
+            postId,
+            userId: session.user.id,
+          },
+        },
+      });
+    }),
+
   create: protectedProcedure
     .input(writeFormSchema)
     .mutation(

@@ -18,7 +18,10 @@ export const Suggestions = () => {
         {Array.from({
           length: 3,
         }).map((_, i) => (
-          <CardDescription key={i} className="flex items-center space-x-4 py-1">
+          <div
+            key={i}
+            className="flex items-center space-x-4 py-1 text-sm text-muted-foreground"
+          >
             <div className="h-10 w-10 rounded-full bg-gray-300"></div>
             <div>
               <div className="font-bold text-gray-900">John Doe</div>
@@ -30,7 +33,7 @@ export const Suggestions = () => {
             <Button className=" transition hover:scale-105 hover:shadow-xl">
               Follow
             </Button>
-          </CardDescription>
+          </div>
         ))}
       </CardContent>
     </>
