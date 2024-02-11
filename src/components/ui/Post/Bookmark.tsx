@@ -12,9 +12,7 @@ interface BookmarkProps {
 }
 const Bookmark = ({ postId, isPostBookmarked }: BookmarkProps) => {
   const { toast: radixToast } = useToast();
-  const {
-    post: { findAll },
-  } = api.useUtils();
+  const { post } = api.useUtils();
   const { mutate: addToBookmarks } = api.post.addToBookmarks.useMutation({
     onSuccess: async () => {
       radixToast({
@@ -22,7 +20,10 @@ const Bookmark = ({ postId, isPostBookmarked }: BookmarkProps) => {
         description: getFormattedDate(),
         duration: 3000,
       });
-      await findAll.invalidate();
+      await Promise.all([
+        post.findAllBookmarksId.invalidate(),
+        post.findAllBookmarks.invalidate(),
+      ]);
     },
     onError: (err) => {
       console.log(err);
@@ -39,7 +40,10 @@ const Bookmark = ({ postId, isPostBookmarked }: BookmarkProps) => {
           title: "Removed from bookmarks",
           description: getFormattedDate(),
         });
-        await findAll.invalidate();
+        await Promise.all([
+          post.findAllBookmarksId.invalidate(),
+          post.findAllBookmarks.invalidate(),
+        ]);
       },
       onError: (err) => {
         console.log(err);

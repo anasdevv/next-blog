@@ -1,18 +1,14 @@
-import { unstable_noStore as noStore } from "next/cache";
-import Link from "next/link";
-
-import { api } from "@/trpc/server";
-import { Button } from "@/components/ui/button";
-import { Sidebar } from "@/components/ui/Home/Sidebar";
-import { Search } from "@/components/ui/search";
-import Tags from "@/components/ui/Home/Tags";
+import { PostList } from "@/components/ui/Home/PostList";
 import SelectContext from "@/components/ui/Home/SelectContext";
-import { PostList } from "@/components/ui/Home";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Modal from "@/components/ui/Modal";
+import { Sidebar } from "@/components/ui/Home/Sidebar";
+import Tags from "@/components/ui/Home/Tags";
 import WriteFormModal from "@/components/ui/Home/WriteFormModal";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Search } from "@/components/ui/search";
 
 export default async function Home() {
+  // await helpers.post.findAll.prefetch();
+  // await helpers.post.findAllBookmarksId.prefetch();
   return (
     <section className="grid w-full grid-cols-12 px-4 pt-2">
       <main className="col-span-8 h-full w-full border-r border-gray-300 ">

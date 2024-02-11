@@ -1,3 +1,4 @@
+import { generateUsername } from "@/lib/utils";
 import { faker } from "@faker-js/faker";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
@@ -13,6 +14,7 @@ async function main() {
         name: faker.name.fullName(),
         email: faker.internet.email(),
         image: faker.internet.avatar(),
+        username: generateUsername(faker.name.fullName()),
       },
     });
 

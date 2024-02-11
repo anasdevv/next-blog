@@ -6,10 +6,12 @@ import { api } from "@/trpc/react";
 import { toast } from "react-hot-toast";
 import { useToast } from "../use-toast";
 import { getFormattedDate } from "@/lib/utils";
+import { useGlobalContext } from "@/context/GlobalContext";
 interface LikeAndCommentProps {
   postId: string;
 }
 const LikeAndComment = ({ postId }: LikeAndCommentProps) => {
+  const { setisCommentDrawerOpen } = useGlobalContext();
   const { toast: radixToast } = useToast();
   const { data: isPostLiked, refetch } = api.post.isPostLiked.useQuery(
     { postId },
@@ -74,7 +76,12 @@ const LikeAndComment = ({ postId }: LikeAndCommentProps) => {
               />
             )}
           </div>
-          <div className="cursor-pointer">
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              setisCommentDrawerOpen(true);
+            }}
+          >
             <BsChat className="text-base text-gray-500" />
           </div>
         </div>

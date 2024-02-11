@@ -5,6 +5,17 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  images: {
+    remotePatterns: [
+      {
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        hostname: "cloudflare-ipfs.com",
+      },
+    ],
+  },
+};
 
 export default config;

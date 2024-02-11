@@ -1,25 +1,24 @@
-import Comment from "@/components/ui/Post/Comment";
+import CommentSection from "@/components/ui/Post/Comment/CommentSection";
 import LikeAndComment from "@/components/ui/Post/LikeAndComment";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/trpc/server";
-// import { api } from "@/trpc/react";
-import React from "react";
+import type { Post } from "@prisma/client";
+
 interface PageProps {
   params: {
     slug: string;
   };
 }
 const page = async ({ params: { slug } }: PageProps) => {
-  let post = null;
-  try {
-    post = await api.post.findBySlug.query({ slug });
-  } catch (error) {
-    console.log("error", error);
-  }
+  const post = (await api.post.findBySlug.query({ slug })) as Post;
+
+  // await helpers.post.getCommentsByPostId.prefetch({
+  //   postId: post.id,
+  // });
 
   return (
     <>
-      <Comment />
+      {!!post && <CommentSection postId={post.id} />}
       <ScrollArea className="h-screen">
         {!!post && <LikeAndComment postId={post.id} />}
         <div className="flex h-full w-full flex-col items-center justify-center p-10">
@@ -41,5 +40,6 @@ const page = async ({ params: { slug } }: PageProps) => {
     </>
   );
 };
+// export const dynamic = "force-dynamic";
 
 export default page;

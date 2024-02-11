@@ -7,44 +7,80 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { writeFormSchema } from "@/lib/Validation";
+import { CreateCommentSchema, CreatePostSchema } from "@/lib/Validation";
 import { TRPCError } from "@trpc/server";
+import { Prisma } from "@prisma/client";
 
 export const postRouter = createTRPCRouter({
-  hello: publicProcedure
-    .input(z.object({ text: z.string() }))
-    .query(({ input }) => {
-      return {
-        greeting: `Hello ${input.text}`,
-      };
-    }),
-
-  findAll: publicProcedure.query(async ({ ctx: { db, session } }) =>
-    db.post.findMany({
+  findAll: publicProcedure
+    .input(
+      z.object({
+        username: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx: { db, session }, input: { username } }) =>
+      db.post.findMany({
+        take: 10,
+        where: {
+          ...((username
+            ? { author: { username } }
+            : {}) as Prisma.PostWhereInput),
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          createdAt: true,
+          slug: true,
+          author: {
+            select: {
+              name: true,
+              id: true,
+              image: true,
+              username: true,
+            },
+          },
+        },
+      }),
+    ),
+  findAllBookmarksId: protectedProcedure.query(async ({ ctx: { db } }) =>
+    db.bookmark.findMany({
       take: 10,
+      orderBy: {
+        post: {
+          createdAt: "desc",
+        },
+      },
+      select: {
+        postId: true,
+      },
+    }),
+  ),
+  findAllBookmarks: protectedProcedure.query(async ({ ctx: { db } }) =>
+    db.bookmark.findMany({
+      take: 4,
       orderBy: {
         createdAt: "desc",
       },
       select: {
-        id: true,
-        title: true,
-        description: true,
-        createdAt: true,
-        slug: true,
-        author: {
+        postId: true,
+        post: {
           select: {
-            name: true,
-            id: true,
-            image: true,
+            slug: true,
+            author: {
+              select: {
+                image: true,
+                name: true,
+              },
+            },
+            createdAt: true,
+            title: true,
+            text: true,
           },
         },
-        bookmarks: session?.user.id
-          ? {
-              select: {
-                id: true,
-              },
-            }
-          : false,
       },
     }),
   ),
@@ -138,7 +174,7 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(writeFormSchema)
+    .input(CreatePostSchema)
     .mutation(
       async ({ ctx: { db, session }, input: { title, body, description } }) => {
         try {
@@ -171,4 +207,51 @@ export const postRouter = createTRPCRouter({
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
   }),
+
+  addComment: protectedProcedure
+    .input(CreateCommentSchema)
+    .mutation(async ({ ctx: { db, session }, input: { text, postId } }) =>
+      db.comment.create({
+        data: {
+          text,
+          user: {
+            connect: {
+              id: session.user.id,
+            },
+          },
+          post: {
+            connect: {
+              id: postId,
+            },
+          },
+        },
+      }),
+    ),
+  getCommentsByPostId: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      }),
+    )
+    .query(async ({ ctx: { db }, input: { postId } }) =>
+      db.comment.findMany({
+        where: {
+          postId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          text: true,
+          createdAt: true,
+          user: {
+            select: {
+              name: true,
+              image: true,
+            },
+          },
+        },
+      }),
+    ),
 });

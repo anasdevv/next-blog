@@ -34,7 +34,7 @@ export const Header = () => {
             <Avatar>
               <Suspense fallback={<AvatarFallback />}>
                 <Avatar>
-                  <AvatarImage src="www.notfound.com" alt="user avatar" />
+                  {/* <AvatarImage src="www.notfound.com" alt="user avatar" /> */}
                 </Avatar>
               </Suspense>
             </Avatar>

@@ -7,7 +7,7 @@ import SessionWrapper from "@/components/SessionWrapper";
 import { GlobalContextProvider } from "@/context/GlobalContext";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as ReactHotToaster } from "react-hot-toast";
-import { Header } from "@/components/ui/Home";
+import { Header } from "@/components/ui/Home/Header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,13 +29,13 @@ export default function RootLayout({
     <SessionWrapper>
       <GlobalContextProvider>
         <html lang="en">
-          <body className={`font-sans ${inter.variable} overflow-hidden`}>
+          <body className={`font-sans ${inter.variable} overflow-y-auto`}>
             <ReactHotToaster position="top-center" />
             <TRPCReactProvider>
-            <div className="flex w-full flex-col">
-      <Header />
-              {children}
-            </div>
+              <div className="flex w-full flex-col overflow-hidden">
+                <Header />
+                {children}
+              </div>
             </TRPCReactProvider>
             <Toaster />
           </body>
