@@ -1,4 +1,4 @@
-#!/bin/bash
+dock#!/bin/bash
 # Use this script to start a docker container for a local development database
 
 # TO RUN ON WINDOWS: 
@@ -39,6 +39,6 @@ if [ "$DB_PASSWORD" = "password" ]; then
   sed -i -e "s/:password@/:$DB_PASSWORD@/" .env
 fi
 
-docker run --name $DB_CONTAINER_NAME -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=blog-next -d -p 5432:5432 docker.io/postgres
+docker run --name $DB_CONTAINER_NAME -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=blog-next -d -p 5432:5432 docker.io/postgres:14.5
 
 echo "Database container was succesfuly created"

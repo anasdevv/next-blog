@@ -25,6 +25,7 @@ export const Post = ({
     slug,
     author: { name, image, username },
     isBookmarked,
+    tags,
   },
 }: PostProps) => {
   const { status } = useSession();
@@ -73,7 +74,7 @@ export const Post = ({
         </div>
       </Link>
       <div className="flex justify-between">
-        <Tags />
+        <Tags tags={tags ?? []} />
 
         {status === "authenticated" && showBookmark && (
           <Bookmark postId={id} isPostBookmarked={isBookmarked} />

@@ -14,6 +14,9 @@ const config = {
       {
         hostname: "cloudflare-ipfs.com",
       },
+      {
+        hostname: "images.unsplash.com",
+      },
     ],
   },
 };

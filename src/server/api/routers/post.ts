@@ -43,6 +43,12 @@ export const postRouter = createTRPCRouter({
               username: true,
             },
           },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       }),
     ),
@@ -174,9 +180,24 @@ export const postRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure
-    .input(CreatePostSchema)
+    .input(
+      CreatePostSchema.and(
+        z.object({
+          tags: z
+            .array(
+              z.object({
+                id: z.string(),
+              }),
+            )
+            .optional(),
+        }),
+      ),
+    )
     .mutation(
-      async ({ ctx: { db, session }, input: { title, body, description } }) => {
+      async ({
+        ctx: { db, session },
+        input: { title, body, description, tags },
+      }) => {
         try {
           await db.post.create({
             data: {
@@ -186,6 +207,9 @@ export const postRouter = createTRPCRouter({
               text: body,
               slug: slugify(title),
               authorId: session.user.id,
+              tags: {
+                connect: tags,
+              },
             },
           });
           return "success";
@@ -197,7 +221,38 @@ export const postRouter = createTRPCRouter({
         }
       },
     ),
-
+  updatePostFeaturedImage: protectedProcedure
+    .input(
+      z.object({
+        imageUrl: z.string(),
+        postId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx: { db, session }, input: { imageUrl, postId } }) => {
+      const postData = await db.post.findUnique({
+        where: {
+          id: postId,
+        },
+      });
+      if (!postData) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+        });
+      }
+      if (postData.authorId !== session.user.id) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+        });
+      }
+      return db.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          featuredImage: imageUrl,
+        },
+      });
+    }),
   getLatest: protectedProcedure.query(({ ctx }) => {
     return ctx.db.post.findFirst({
       orderBy: { createdAt: "desc" },

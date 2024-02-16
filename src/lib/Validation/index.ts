@@ -40,3 +40,8 @@ export const CreateTagSchema = z.object({
     .max(20, { message: "Tag must be less than 20 characters" }),
 });
 export type CreateTag = z.infer<typeof CreateTagSchema>;
+
+export const ImageSearchQuerySchema = z.object({
+  searchQuery: z.string(),
+});
+export type ImageQuery = z.infer<typeof ImageSearchQuerySchema>;

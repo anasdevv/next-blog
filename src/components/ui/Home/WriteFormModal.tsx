@@ -6,21 +6,21 @@ import { getFormattedDate } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
+import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { AiOutlineLoading } from "react-icons/ai";
 import Modal from "../Modal";
+import { Option, SearchableSelect } from "../SearchableSelect";
 import { Button } from "../button";
 import { Input } from "../input";
 import { Textarea } from "../textarea";
 import { useToast } from "../use-toast";
-import { CreateTag } from "./CreateTag";
-import { SearchableSelect } from "../SearchableSelect";
 import { CreateTagModel } from "./CreateTagModel";
-import { useCallback, useState } from "react";
+import Tags from "./Tags";
 const WriteFormModal = () => {
   const [isTagModalOpen, setIsTagModalOpen] = useState<boolean>(false);
-
+  const [selectedTags, setSelectedTags] = useState<Option[]>([]);
   const { isWriteModalOpen, setIsWriteModalOpen } = useGlobalContext();
   const { toast: radixToast } = useToast();
   const {
@@ -31,6 +31,8 @@ const WriteFormModal = () => {
   } = useForm<CreateBlogPost>({
     resolver: zodResolver(CreatePostSchema),
   });
+  const { data: tags, isLoading: fetchTagsLoading } =
+    api.tag.fetchAll.useQuery();
   const { post } = api.useUtils();
   const { mutate: createPost, isLoading } = api.post.create.useMutation({
     onSuccess: async () => {
@@ -56,17 +58,27 @@ const WriteFormModal = () => {
     [isTagModalOpen],
   );
   const onSubmit = (data: CreateBlogPost) => {
-    createPost(data);
+    createPost({
+      ...data,
+      tags: selectedTags?.map(({ value }) => ({ id: value })),
+    });
     // revalidatePath("/");
   };
   return (
-    <>
-      <Modal isOpen={isWriteModalOpen} close={() => setIsWriteModalOpen(false)}>
-        <CreateTagModel isOpen={isTagModalOpen} close={closeTagModal} />
-
+    <Modal isOpen={isWriteModalOpen} close={() => setIsWriteModalOpen(false)}>
+      <CreateTagModel isOpen={isTagModalOpen} close={closeTagModal} />
+      <div className="flex flex-col">
         <div className="flex w-full items-center justify-between pb-4">
           <div className="w-full">
-            <SearchableSelect />
+            <SearchableSelect
+              options={tags?.map((t) => ({
+                label: t.name,
+                value: t.id,
+              }))}
+              isLoading={fetchTagsLoading}
+              selected={selectedTags}
+              setSelected={setSelectedTags}
+            />
           </div>
           <div className="flex w-full justify-end">
             {/* button */}
@@ -80,6 +92,19 @@ const WriteFormModal = () => {
             </Button>
           </div>
         </div>
+        <div className="flex flex-wrap">
+          <Tags
+            cancel
+            tags={selectedTags.map(({ value, label }) => ({
+              name: label,
+              id: value,
+            }))}
+            onCancel={(tagId: string) => {
+              setSelectedTags((prev) => prev.filter((o) => o.value !== tagId));
+            }}
+          />
+        </div>
+
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col items-center justify-center space-y-4"
@@ -140,8 +165,8 @@ const WriteFormModal = () => {
             </Button>
           </div>
         </form>
-      </Modal>
-    </>
+      </div>
+    </Modal>
   );
 };
 

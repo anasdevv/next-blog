@@ -1,5 +1,5 @@
 import slugify from "slugify";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { CreateTagSchema } from "@/lib/Validation";
 import { devNull } from "os";
@@ -24,6 +24,14 @@ export const tagRouter = createTRPCRouter({
         return true;
       }
     }),
+  fetchAll: protectedProcedure.query(({ ctx: { db } }) =>
+    db.tag.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+  ),
   create: protectedProcedure
     .input(CreateTagSchema)
     .mutation(async ({ ctx: { db }, input: { description, name } }) => {

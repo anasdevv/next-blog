@@ -33,7 +33,7 @@ const UserProfilePage = ({ params: { username } }: PageProps) => {
       <div className="lg:max-w-screen my-10 flex w-full flex-col items-center justify-center  xl:max-w-screen-lg">
         <div className="flex w-full flex-col rounded-3xl bg-white shadow-lg">
           <div className="bg-gradient h-44 w-full rounded-t-3xl bg-gradient-to-r from-rose-100 to-teal-100 ">
-            <div className="absolute left-40 top-[13.6rem] cursor-pointer">
+            <div className="absolute left-[17rem] top-[13.6rem] cursor-pointer">
               <Avatar className="group relative h-28 w-28 cursor-default rounded-full border-2 border-white bg-gray-100">
                 {loggedInState?.user.id === user?.id && (
                   <label
