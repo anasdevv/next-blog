@@ -28,6 +28,12 @@ const UserProfilePage = ({ params: { username } }: PageProps) => {
       enabled: Boolean(username),
     },
   );
+  const { data: count } = api.user.getFollowersAndFollowingCount.useQuery(
+    { username },
+    {
+      enabled: Boolean(username),
+    },
+  );
   return (
     <div className="flex h-full w-full items-center justify-center ">
       <div className="lg:max-w-screen my-10 flex w-full flex-col items-center justify-center  xl:max-w-screen-lg">
@@ -64,6 +70,10 @@ const UserProfilePage = ({ params: { username } }: PageProps) => {
             </div>
             <div className="text-gray-600">@{user?.username}</div>
             <div className="text-gray-600">{user?._count.posts ?? 0} Posts</div>
+            <div className="flex items-center space-x-4 text-gray-600">
+              <span>{count?._count.followedBy ?? 0} Followers </span>
+              <span>{count?._count.followings ?? 0} Following </span>
+            </div>
             <div>
               <Button
                 onClick={() => {

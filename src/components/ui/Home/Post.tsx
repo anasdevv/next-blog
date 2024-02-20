@@ -7,6 +7,7 @@ import Bookmark from "../Post/Bookmark";
 import type { inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@/server/api/root";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
 type Post = RouterOutput["post"]["findAll"][number] & { isBookmarked: boolean };
@@ -26,12 +27,13 @@ export const Post = ({
     author: { name, image, username },
     isBookmarked,
     tags,
+    featuredImage,
   },
 }: PostProps) => {
   const { status } = useSession();
   return (
-    <div className=" mt-4 flex flex-col space-y-4 border-b border-gray-300 py-5 last:border-none">
-      <Link className=" " href={`/user/${username}`}>
+    <div className=" last:border-nones relative mt-4 flex flex-col space-y-4 border-b border-gray-300 py-5">
+      <Link className="flex justify-between" href={`/user/${username}`}>
         <div className="group flex w-full cursor-pointer items-center space-x-2">
           {/* name and all that */}
           <div className="h-10 w-10 rounded-full">
@@ -53,13 +55,15 @@ export const Post = ({
             <p className="text-sm">Student Developer Teacher</p>
           </div>
         </div>
+        {status === "authenticated" && showBookmark && (
+          <Bookmark postId={id} isPostBookmarked={isBookmarked} />
+        )}
       </Link>
       <Link href={`/post/${slug}`}>
         <div
           className="group grid w-full cursor-pointer grid-cols-12 gap-4"
           onClick={() => {
             console.log("clicked");
-            // await navigate(slug);
           }}
         >
           <div className="col-span-8 w-full">
@@ -68,17 +72,15 @@ export const Post = ({
             </p>
             <p className=" break-words text-sm text-gray-700">{description}</p>
           </div>
-          <div className="col-span-4 min-h-32">
-            <div className="h-full w-full transform rounded-xl bg-gray-300 transition hover:scale-105 hover:shadow-xl"></div>
+          <div className="col-span-4 min-h-36">
+            <div className="h-full w-full transform rounded-xl bg-gray-300 transition hover:scale-105 hover:shadow-xl">
+              <Image src={featuredImage ?? ""} alt={slug} fill />
+            </div>
           </div>
         </div>
       </Link>
       <div className="flex justify-between">
         <Tags tags={tags ?? []} />
-
-        {status === "authenticated" && showBookmark && (
-          <Bookmark postId={id} isPostBookmarked={isBookmarked} />
-        )}
       </div>
     </div>
   );

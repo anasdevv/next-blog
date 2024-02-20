@@ -17,6 +17,9 @@ const config = {
       {
         hostname: "images.unsplash.com",
       },
+      {
+        hostname: "source.unsplash.com",
+      },
     ],
   },
 };

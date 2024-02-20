@@ -35,6 +35,7 @@ export const postRouter = createTRPCRouter({
           description: true,
           createdAt: true,
           slug: true,
+          featuredImage: true,
           author: {
             select: {
               name: true,
@@ -65,30 +66,40 @@ export const postRouter = createTRPCRouter({
       },
     }),
   ),
-  findAllBookmarks: protectedProcedure.query(async ({ ctx: { db } }) =>
-    db.bookmark.findMany({
-      take: 4,
-      orderBy: {
-        createdAt: "desc",
+  findAllBookmarks: protectedProcedure.query(
+    async ({
+      ctx: {
+        db,
+        session: { user },
       },
-      select: {
-        postId: true,
-        post: {
-          select: {
-            slug: true,
-            author: {
-              select: {
-                image: true,
-                name: true,
+    }) =>
+      db.bookmark.findMany({
+        where: {
+          userId: user.id,
+        },
+        take: 4,
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          postId: true,
+          post: {
+            select: {
+              featuredImage: true,
+              slug: true,
+              author: {
+                select: {
+                  image: true,
+                  name: true,
+                },
               },
+              createdAt: true,
+              title: true,
+              text: true,
             },
-            createdAt: true,
-            title: true,
-            text: true,
           },
         },
-      },
-    }),
+      }),
   ),
   findBySlug: publicProcedure
     .input(z.object({ slug: z.string() }))
@@ -101,8 +112,10 @@ export const postRouter = createTRPCRouter({
           id: true,
           title: true,
           description: true,
+          featuredImage: true,
           text: true,
           createdAt: true,
+          authorId: true,
         },
       }),
     ),
@@ -244,6 +257,7 @@ export const postRouter = createTRPCRouter({
           code: "FORBIDDEN",
         });
       }
+      console.log("imageUrl", imageUrl);
       return db.post.update({
         where: {
           id: postId,

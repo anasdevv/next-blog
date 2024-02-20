@@ -18,6 +18,7 @@ import { Textarea } from "../textarea";
 import { useToast } from "../use-toast";
 import { CreateTagModel } from "./CreateTagModel";
 import Tags from "./Tags";
+import { useSession } from "next-auth/react";
 const WriteFormModal = () => {
   const [isTagModalOpen, setIsTagModalOpen] = useState<boolean>(false);
   const [selectedTags, setSelectedTags] = useState<Option[]>([]);
@@ -31,8 +32,13 @@ const WriteFormModal = () => {
   } = useForm<CreateBlogPost>({
     resolver: zodResolver(CreatePostSchema),
   });
-  const { data: tags, isLoading: fetchTagsLoading } =
-    api.tag.fetchAll.useQuery();
+  const { status } = useSession();
+  const { data: tags, isLoading: fetchTagsLoading } = api.tag.fetchAll.useQuery(
+    undefined,
+    {
+      enabled: status === "authenticated",
+    },
+  );
   const { post } = api.useUtils();
   const { mutate: createPost, isLoading } = api.post.create.useMutation({
     onSuccess: async () => {

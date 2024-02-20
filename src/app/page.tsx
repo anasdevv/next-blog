@@ -21,7 +21,6 @@ export default async function Home() {
               </div>
             </div>
           </div>
-          <Tags title="My Topics" />
         </div>
         <ScrollArea className="h-[70vh]">
           <PostList />

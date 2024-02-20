@@ -46,6 +46,8 @@ model User {
   likes         Like[]
   posts         Post[]
   sessions      Session[]
+  followedBy    User[]     @relation("userFollows")
+  followings    User[]     @relation("userFollows")
 }
 
 model VerificationToken {
