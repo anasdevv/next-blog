@@ -194,12 +194,25 @@ export const userRouter = createTRPCRouter({
         },
         take: 10,
       };
-      const [likedPostTags, bookmarkedPostTags] = await Promise.all([
+      const [likedPostTags, bookmarkedPostTags, userIds] = await Promise.all([
         db.like.findMany(fetchTagsQuery),
         db.bookmark.findMany(fetchTagsQuery),
+        db.user.findUnique({
+          where: {
+            id: user.id,
+          },
+          select: {
+            followings: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        }),
       ]);
       const likedTags = getTagIds(likedPostTags);
       const bookmarkedTags = getTagIds(bookmarkedPostTags);
+      console.log(userIds);
       console.log("like tags ", likedTags);
       return db.user.findMany({
         where: {
@@ -235,9 +248,16 @@ export const userRouter = createTRPCRouter({
               },
             },
           ],
-          NOT: {
-            id: user.id,
-          },
+          NOT: [
+            {
+              id: user.id,
+            },
+            {
+              id: {
+                in: userIds?.followings.map((f) => f.id),
+              },
+            },
+          ],
         },
         select: {
           name: true,
