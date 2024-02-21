@@ -5,15 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "../scroll-area";
+import { getRelativeTime } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import Image from "next/image";
-import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
-import { getRelativeTime } from "@/lib/utils";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { MdOutlineDoNotDisturbAlt } from "react-icons/md";
-
+import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { ScrollArea } from "../scroll-area";
+import { Interweave } from "interweave";
 const ReadingList = () => {
   const { data: bookmarks } = api.post.findAllBookmarks.useQuery();
   return (
@@ -21,14 +19,14 @@ const ReadingList = () => {
       <CardHeader className="py-1 font-bold lg:py-2">
         Your reading list
       </CardHeader>
-      <ScrollArea className="h-screen pb-8">
+      <ScrollArea className="h-[70vh] pb-8">
         <CardContent className="flex flex-col space-y-4 pb-16">
           {bookmarks && bookmarks.length > 0 ? (
             bookmarks?.map(
               ({
                 post: {
                   slug,
-                  text,
+                  html,
                   title,
                   author: { image, name },
                   createdAt,
@@ -37,15 +35,29 @@ const ReadingList = () => {
               }) => (
                 <Link href={`/post/${slug}`} key={slug}>
                   <div className="group flex cursor-pointer items-start space-x-2">
-                    <div className="aspect-square w-2/4 rounded-xl bg-gray-300">
-                      {/* <Image src={featuredImage ?? ""} alt={slug} fill /> */}
+                    <div className="aspect-square h-full w-2/4 rounded-xl bg-gray-300">
+                      <div className="h-full w-full">
+                        <Image
+                          src={featuredImage ?? ""}
+                          alt={slug}
+                          sizes="100vw" // width={200}
+                          objectFit="contain"
+                          // objectPosition="50% 50%"
+                          // height={500}
+                          width={0}
+                          height={"0"}
+                          className="aspect-square h-full w-full rounded"
+                        />
+                      </div>
                     </div>
                     <div className="flex w-3/5 flex-col space-y-1 ">
                       <CardTitle className="decoration-gray-600 group-hover:underline">
                         {title}
                       </CardTitle>
                       <CardDescription className=" leading-2 line-clamp-4 text-xs">
-                        {text}
+                        <div className="">
+                          <Interweave content={html} />
+                        </div>
                       </CardDescription>
                       <div className=" mt-2 flex w-full items-center justify-between space-x-4 pt-2">
                         <div className="flex items-center space-x-1">

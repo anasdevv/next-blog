@@ -1,7 +1,7 @@
 import AuthError from "next-auth";
 import slugify from "slugify";
 import { z } from "zod";
-
+const LIMIT = 10;
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -16,42 +16,62 @@ export const postRouter = createTRPCRouter({
     .input(
       z.object({
         username: z.string().optional(),
+        limit: z.number().min(1).max(10).nullish(),
+        cursor: z.string().nullish(),
       }),
     )
-    .query(async ({ ctx: { db, session }, input: { username } }) =>
-      db.post.findMany({
-        take: 10,
-        where: {
-          ...((username
-            ? { author: { username } }
-            : {}) as Prisma.PostWhereInput),
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          createdAt: true,
-          slug: true,
-          featuredImage: true,
-          author: {
-            select: {
-              name: true,
-              id: true,
-              image: true,
-              username: true,
+    .query(
+      async ({ ctx: { db, session }, input: { username, limit, cursor } }) => {
+        console.log(limit, "cursor ", cursor);
+        const posts = await db.post.findMany({
+          take: (limit ?? LIMIT) + 1,
+          where: {
+            ...((username
+              ? { author: { username } }
+              : {}) as Prisma.PostWhereInput),
+          },
+          cursor: cursor
+            ? {
+                id: cursor,
+              }
+            : undefined,
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            createdAt: true,
+            slug: true,
+            featuredImage: true,
+            author: {
+              select: {
+                name: true,
+                id: true,
+                image: true,
+                username: true,
+              },
+            },
+            tags: {
+              select: {
+                id: true,
+                name: true,
+              },
             },
           },
-          tags: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      }),
+        });
+        let nextCursor: typeof cursor | undefined = undefined;
+        if (posts.length > (limit ?? LIMIT)) {
+          const nextItem = posts.pop();
+          nextCursor = nextItem?.id;
+        }
+        console.log("next cursor from server ", nextCursor);
+        return {
+          posts,
+          nextCursor,
+        };
+      },
     ),
   findAllBookmarksId: protectedProcedure.query(async ({ ctx: { db } }) =>
     db.bookmark.findMany({
@@ -66,6 +86,7 @@ export const postRouter = createTRPCRouter({
       },
     }),
   ),
+
   findAllBookmarks: protectedProcedure.query(
     async ({
       ctx: {
