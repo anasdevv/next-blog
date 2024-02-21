@@ -10,10 +10,13 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 type RouterOutput = inferRouterOutputs<AppRouter>;
 
-type Post = RouterOutput["post"]["findAll"][number] & { isBookmarked: boolean };
+type Post = RouterOutput["post"]["findAll"]["posts"][number] & {
+  isBookmarked: boolean;
+};
 export interface PostProps {
   post: Post;
   showBookmark: boolean;
+  innerRef?: (node?: Element | null | undefined) => void;
 }
 
 export const Post = ({
@@ -29,10 +32,14 @@ export const Post = ({
     tags,
     featuredImage,
   },
+  innerRef,
 }: PostProps) => {
   const { status } = useSession();
   return (
-    <div className=" last:border-nones relative mt-4 flex flex-col space-y-4 border-b border-gray-300 py-5">
+    <div
+      ref={innerRef}
+      className=" last:border-nones relative mt-4 flex flex-col space-y-4 border-b border-gray-300 py-5"
+    >
       <Link className="flex justify-between" href={`/user/${username}`}>
         <div className="group flex w-full cursor-pointer items-center space-x-2">
           {/* name and all that */}

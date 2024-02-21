@@ -1,18 +1,35 @@
 "use client";
-import React, { Suspense, useMemo } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 import { Post } from "./Post";
 import { api } from "@/trpc/react";
 import { AiOutlineLoading } from "react-icons/ai";
 import { useSession } from "next-auth/react";
+import { useInView } from "react-intersection-observer";
 // import { api } from "@/trpc/react";
 interface PostListProps {
   username?: string;
 }
-
+const LIMIT = 5;
 export const PostList = ({ username }: PostListProps) => {
-  const { data: posts } = api.post.findAll.useQuery({
-    ...(username ? { username } : {}),
-  });
+  const { ref, inView } = useInView();
+  const {
+    data: postPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = api.post.findAll.useInfiniteQuery(
+    {
+      limit: LIMIT,
+      ...(username ? { username } : {}),
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    },
+  );
+  const posts = useMemo(
+    () => postPages?.pages.flatMap((page) => page.posts) ?? [],
+    [postPages?.pages],
+  );
   const { status } = useSession();
   const { data } = api.post.findAllBookmarksId.useQuery(undefined, {
     enabled: status === "authenticated" && Boolean(username),
@@ -21,7 +38,13 @@ export const PostList = ({ username }: PostListProps) => {
     () => data?.map(({ postId }) => postId) ?? [],
     [data],
   );
-  console.log("data ", posts);
+  console.log("has nex ", hasNextPage);
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage]);
+  // console.log("data ", posts);
   console.log(bookmarksPostIds);
   return (
     <div className="px-10">
@@ -34,6 +57,7 @@ export const PostList = ({ username }: PostListProps) => {
       >
         {posts?.map((post, i) => (
           <Post
+            innerRef={posts.length === i + 1 ? ref : undefined}
             key={i}
             showBookmark={!Boolean(username)}
             post={{
@@ -45,6 +69,11 @@ export const PostList = ({ username }: PostListProps) => {
           />
         ))}
       </Suspense>
+      {isFetchingNextPage && (
+        <div className="mt-3 flex h-full w-full items-center justify-center">
+          <AiOutlineLoading className="animate-spin text-3xl" />
+        </div>
+      )}
     </div>
   );
 };
