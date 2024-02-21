@@ -14,7 +14,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "@/hooks/useDebounce";
 import { api } from "@/trpc/react";
 import Image from "next/image";
-import { LoaderIcon } from "react-hot-toast";
+import { Interweave } from "interweave";
 import clsx from "clsx";
 import { Button } from "../button";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
@@ -148,7 +148,9 @@ export const PostDetails = ({ post }: PostDetails) => {
             <div className="border-l-4 border-gray-800 pl-6">
               {post?.description}
             </div>
-            <div>{post?.text}</div>
+            <div className="prose lg:prose-xl">
+              <Interweave content={post?.html} />
+            </div>
           </div>
         </div>
       </ScrollArea>

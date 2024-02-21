@@ -21,8 +21,8 @@ export const Sidebar = () => {
         <p>Login to get started</p>
         <div
           className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-300"
-          onClick={() => {
-            signIn();
+          onClick={async () => {
+            await signIn();
           }}
         >
           <CiLogin className="text-2xl text-gray-900" />

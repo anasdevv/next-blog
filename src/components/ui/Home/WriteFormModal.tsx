@@ -3,22 +3,31 @@
 import { useGlobalContext } from "@/context/GlobalContext";
 import { CreateBlogPost, CreatePostSchema } from "@/lib/Validation";
 import { getFormattedDate } from "@/lib/utils";
+// import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { api } from "@/trpc/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import clsx from "clsx";
-import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useCallback, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { AiOutlineLoading } from "react-icons/ai";
 import Modal from "../Modal";
 import { Option, SearchableSelect } from "../SearchableSelect";
 import { Button } from "../button";
 import { Input } from "../input";
+import dynamic from "next/dynamic";
+
 import { Textarea } from "../textarea";
 import { useToast } from "../use-toast";
 import { CreateTagModel } from "./CreateTagModel";
 import Tags from "./Tags";
 import { useSession } from "next-auth/react";
+
+const ReactQuill = dynamic(() => import("react-quill"), {
+  ssr: false,
+});
+
 const WriteFormModal = () => {
   const [isTagModalOpen, setIsTagModalOpen] = useState<boolean>(false);
   const [selectedTags, setSelectedTags] = useState<Option[]>([]);
@@ -28,6 +37,7 @@ const WriteFormModal = () => {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<CreateBlogPost>({
     resolver: zodResolver(CreatePostSchema),
@@ -70,6 +80,71 @@ const WriteFormModal = () => {
     });
     // revalidatePath("/");
   };
+  const imageHandler = () => {
+    console.log("image handler");
+  };
+  const modules = useMemo(
+    () => ({
+      toolbar: {
+        container: [
+          [{ header: [1, 2, 3, 4, 5, 6, false] }],
+          ["bold", "italic", "underline", "strike"],
+          [
+            { list: "ordered" },
+            { list: "bullet" },
+            { indent: "-1" },
+            { indent: "+1" },
+          ],
+          ["image", "link"],
+          [
+            {
+              color: [
+                "#000000",
+                "#e60000",
+                "#ff9900",
+                "#ffff00",
+                "#008a00",
+                "#0066cc",
+                "#9933ff",
+                "#ffffff",
+                "#facccc",
+                "#ffebcc",
+                "#ffffcc",
+                "#cce8cc",
+                "#cce0f5",
+                "#ebd6ff",
+                "#bbbbbb",
+                "#f06666",
+                "#ffc266",
+                "#ffff66",
+                "#66b966",
+                "#66a3e0",
+                "#c285ff",
+                "#888888",
+                "#a10000",
+                "#b26b00",
+                "#b2b200",
+                "#006100",
+                "#0047b2",
+                "#6b24b2",
+                "#444444",
+                "#5c0000",
+                "#663d00",
+                "#666600",
+                "#003700",
+                "#002966",
+                "#3d1466",
+              ],
+            },
+          ],
+        ],
+        handlers: {
+          image: imageHandler,
+        },
+      },
+    }),
+    [],
+  );
   return (
     <Modal isOpen={isWriteModalOpen} close={() => setIsWriteModalOpen(false)}>
       <CreateTagModel isOpen={isTagModalOpen} close={closeTagModal} />
@@ -142,16 +217,30 @@ const WriteFormModal = () => {
             ) : null}
           </div>
           <div className="w-full flex-col space-y-1">
-            <Textarea
+            {/* <Textarea
               id="body"
               placeholder="Blog main body ..."
               cols={10}
               rows={10}
               {...register("body")}
+            /> */}
+            <Controller
+              control={control}
+              name="html"
+              render={({ field }) => (
+                <ReactQuill
+                  modules={modules}
+                  {...field}
+                  value={field.value}
+                  onChange={(value) => field.onChange(value)}
+                  placeholder="Blog Post ..."
+                />
+              )}
             />
-            {errors.body?.message ? (
+            {/* <ReactQuill theme="snow" value={"hi"} /> */}
+            {errors.html?.message ? (
               <p className="w-full pl-2 text-left text-sm text-red-500">
-                {errors.body.message}
+                {errors.html.message}
               </p>
             ) : null}
           </div>

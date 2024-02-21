@@ -11,7 +11,7 @@ export const CreatePostSchema = z.object({
     .trim()
     .min(50, { message: "Description must be at least 50 characters long" })
     .max(200, { message: "Description must be at less than 200 characters" }),
-  body: z
+  html: z
     .string()
     .trim()
     .min(100, { message: "Body must be at least 100 characters long" })

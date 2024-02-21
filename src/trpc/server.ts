@@ -10,8 +10,6 @@ import { observable } from "@trpc/server/observable";
 import { type TRPCErrorResponse } from "@trpc/server/rpc";
 import { headers } from "next/headers";
 import { cache } from "react";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import superjson from "superjson";
 
 import { appRouter, type AppRouter } from "@/server/api/root";
 import { createTRPCContext } from "@/server/api/trpc";

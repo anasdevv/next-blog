@@ -95,7 +95,7 @@ export const postRouter = createTRPCRouter({
               },
               createdAt: true,
               title: true,
-              text: true,
+              html: true,
             },
           },
         },
@@ -113,7 +113,7 @@ export const postRouter = createTRPCRouter({
           title: true,
           description: true,
           featuredImage: true,
-          text: true,
+          html: true,
           createdAt: true,
           authorId: true,
         },
@@ -209,15 +209,14 @@ export const postRouter = createTRPCRouter({
     .mutation(
       async ({
         ctx: { db, session },
-        input: { title, body, description, tags },
+        input: { title, html, description, tags },
       }) => {
         try {
           await db.post.create({
             data: {
-              html: "<div> hello </div>",
+              html,
               title,
               description,
-              text: body,
               slug: slugify(title),
               authorId: session.user.id,
               tags: {

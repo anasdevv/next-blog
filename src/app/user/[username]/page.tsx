@@ -76,8 +76,8 @@ const UserProfilePage = ({ params: { username } }: PageProps) => {
             </div>
             <div>
               <Button
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
+                onClick={async () => {
+                  await navigator.clipboard.writeText(window.location.href);
                   toast({
                     description: "URL copied to clipboard ✅",
                   });
